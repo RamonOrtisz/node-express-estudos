@@ -1,10 +1,14 @@
 import express from "express";
 import bcrypt from "bcrypt";
+import jwt from 'jsonwebtoken'
 
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 const router = express.Router();
+
+const JWT_SECRET = process.env.JWT_SECRET
+
 
 //Cadastro
 router.post("/cadastro", async (req, res) => {
@@ -51,8 +55,9 @@ router.post("/login", async (req, res) => {
     }
 
     // Gerar o token JWT
+    const token = jwt.sign({id: user.id}, JWT_SECRET, {expiresIn: '1m'})
 
-    res.status(200).json(user)
+    res.status(200).json(token)
   } catch (err) {
     res.status(500).json({ message: "Deu erro, tente novamente..." });
   }
