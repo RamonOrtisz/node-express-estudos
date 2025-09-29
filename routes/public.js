@@ -23,10 +23,39 @@ router.post("/cadastro", async (req, res) => {
     });
     res.status(201).json(userDB);
   } catch (err) {
-    res.status(500).json({ message: "Deu erro"});
+    res.status(500).json({ message: "Deu erro" });
   }
 });
 
 //Login
+
+router.post("/login", async (req, res) => {
+  try {
+    const userInfo = req.body;
+
+    //Busca o usuário no banco de dados
+    const user = await prisma.user.findUnique({
+      where: { email: userInfo.email },
+    })
+
+    // Verifica se o usuário existe no banco
+    if(!user){
+      return res.status(404).json({message: "Usuario não encontrado"})
+    }
+
+    // Compara a senha do banco com oque o usuário  digitou
+    const isMatch = await bcrypt.compare(userInfo.password, user.password)
+
+    if(!isMatch){
+      return res.status(400).json({message: "senha invalida"})
+    }
+
+    // Gerar o token JWT
+
+    res.status(200).json(user)
+  } catch (err) {
+    res.status(500).json({ message: "Deu erro, tente novamente..." });
+  }
+});
 
 export default router;
